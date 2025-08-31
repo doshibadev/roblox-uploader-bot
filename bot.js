@@ -234,12 +234,12 @@ async function runScrape(interaction, robloCookie, maxCount = 5) {
           uploaded++;
         } catch (upErr) {
           if (upErr.message === "USER_MODERATED") {
-            const alertMsg = "❌ Account is moderated. Please reactivate the account manually and rerun the command.";
-            await interaction.editReply(alertMsg);
-            // Also send a separate follow-up so the message isn't lost in edits
-            await interaction.followUp({ content: alertMsg, ephemeral: true });
+            // Inform user but do not stop; uploadDecal will retry internally
+            await interaction.followUp({ content: "⚠️ Account is moderated. Waiting for you to reactivate... bot will keep retrying.", ephemeral: true });
+            logger.warn("Account moderated; continuing retries");
+            // Re-throw to let uploadDecal outer retry mechanism handle waiting
             fs.unlinkSync(tempPath);
-            return; // stop entire process
+            continue;
           }
           logger.debug("Upload failed", upErr.message);
         }

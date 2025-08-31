@@ -33,7 +33,7 @@ async function uploadDecal(imagePath, name, securityCookie, userId, description 
   form.append("fileContent", fs.createReadStream(absolutePath), path.basename(absolutePath));
 
   logger.info(`Uploading ${name}...`);
-  const maxAttempts = 5;
+  const maxAttempts = 15;
   let attempt = 0;
   while (attempt < maxAttempts) {
     attempt++;
@@ -53,7 +53,7 @@ async function uploadDecal(imagePath, name, securityCookie, userId, description 
       );
 
       if (res.status === 429) {
-        const retryAfter = Number(res.headers["retry-after"] || 5);
+        const retryAfter = Number(res.headers["retry-after"] || 10);
         logger.warn(`Rate limited. Waiting ${retryAfter}s before retry (${attempt}/${maxAttempts})`);
         await new Promise((r) => setTimeout(r, retryAfter * 1000));
         continue;
@@ -82,8 +82,8 @@ async function uploadDecal(imagePath, name, securityCookie, userId, description 
       if (attempt >= maxAttempts) {
         throw err;
       }
-      logger.warn(`Attempt ${attempt} failed. Retrying in 3s...`);
-      await new Promise((r) => setTimeout(r, 3000));
+      logger.warn(`Attempt ${attempt} failed. Retrying in 10s...`);
+      await new Promise((r) => setTimeout(r, 10000));
     }
   }
 }
